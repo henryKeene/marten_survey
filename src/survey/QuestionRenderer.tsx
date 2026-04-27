@@ -11,6 +11,20 @@ import { RiskSlider } from "../components/ui/RiskSlider";
 import { SegmentedLikert } from "../components/ui/SegmentedLikert";
 import { SegmentedLikertGroup } from "../components/ui/SegmentedLikertGroup";
 import { ChoiceMatrix } from "../components/ui/ChoiceMatrix";
+import { PhotoGridIdentify } from "../components/ui/PhotoGridIdentify";
+
+/** Filename under public/species/ for each species ID choice value. Falls
+ *  back to a labelled placeholder when the file is missing. */
+const SPECIES_THUMBNAILS: Record<string, string> = {
+  pine_marten: "pm.jpg",
+  fox: "fox.jpg",
+  stoat: "stoat.jpg",
+  ferret: "ferret.jpg",
+  domestic_cat: "domestic_cat.jpg",
+  badger: "badger.jpg",
+};
+
+const PHOTO_GRID_QUESTION_IDS = new Set(["species_f", "species_pm"]);
 import { validateIrishOrNIPostcode, postcodeErrorMessage } from "./validators/postcode";
 
 const FREE_TEXT_NOTICE =
@@ -36,23 +50,37 @@ export function QuestionRenderer({ question: q, answers, onAnswer }: Props) {
         </section>
       );
 
-    case "single":
+    case "single": {
+      const usePhotoGrid = PHOTO_GRID_QUESTION_IDS.has(q.id);
       return (
         <section aria-labelledby={labelId} className="space-y-3">
           <FieldLabel id={labelId} required={q.required}>
             <LabelText text={q.prompt} />
           </FieldLabel>
           {q.hint && <HelperText>{q.hint}</HelperText>}
-          <RadioGroup
-            name={q.id}
-            choices={q.choices}
-            value={typeof value === "string" ? value : null}
-            onChange={(v) => onAnswer(q.id, v)}
-            layout={q.layout}
-            ariaLabelledby={labelId}
-          />
+          {usePhotoGrid ? (
+            <PhotoGridIdentify
+              choices={q.choices.map((c) => ({
+                ...c,
+                thumbnail: SPECIES_THUMBNAILS[c.value],
+              }))}
+              value={typeof value === "string" ? value : null}
+              onChange={(v) => onAnswer(q.id, v)}
+              ariaLabel={q.prompt}
+            />
+          ) : (
+            <RadioGroup
+              name={q.id}
+              choices={q.choices}
+              value={typeof value === "string" ? value : null}
+              onChange={(v) => onAnswer(q.id, v)}
+              layout={q.layout}
+              ariaLabelledby={labelId}
+            />
+          )}
         </section>
       );
+    }
 
     case "multi":
       return (
