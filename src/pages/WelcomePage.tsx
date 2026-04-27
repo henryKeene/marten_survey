@@ -1,16 +1,25 @@
 import { useState } from "react";
 import { Button } from "../components/ui/Button";
 import { Checkbox } from "../components/ui/Checkbox";
+import { IslandMap } from "../components/ui/IslandMap";
 import { ConsentContent } from "../survey/consent-content";
 import { usePageAssetExists } from "../util/use-asset";
 
 interface WelcomePageProps {
   consented: boolean;
   onConsentChange: (v: boolean) => void;
+  region: string | null;
+  onRegionChange: (region: string) => void;
   onStart: () => void;
 }
 
-export function WelcomePage({ consented, onConsentChange, onStart }: WelcomePageProps) {
+export function WelcomePage({
+  consented,
+  onConsentChange,
+  region,
+  onRegionChange,
+  onStart,
+}: WelcomePageProps) {
   const consentImageExists = usePageAssetExists("species/Consent.png");
   const [attempted, setAttempted] = useState(false);
 
@@ -48,6 +57,19 @@ export function WelcomePage({ consented, onConsentChange, onStart }: WelcomePage
           The study aims to examine <strong>public views and experiences relating to wildlife on the island of Ireland</strong> in order to inform wildlife management, conservation planning, and evidence-based decision-making, and will also contribute to academic research in this field.
         </p>
       </header>
+
+      <section className="rounded-2xl border border-forest-200 bg-stone-50 p-5">
+        <h2 className="!font-sans !text-base !font-semibold !text-stone-900">
+          First — where in Ireland are you?
+        </h2>
+        <p className="mt-1 text-sm text-stone-700">
+          Optional. Tap the region where you live so we can see how views vary
+          across the island.
+        </p>
+        <div className="mt-4">
+          <IslandMap value={region} onChange={onRegionChange} />
+        </div>
+      </section>
 
       <ConsentContent />
 

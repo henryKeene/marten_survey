@@ -58,6 +58,12 @@ export function SurveyWizard() {
           <WelcomePage
             consented={wiz.state.answers.__consent === true}
             onConsentChange={(v) => wiz.setAnswer("__consent", v as never)}
+            region={
+              typeof wiz.state.answers.__region === "string"
+                ? (wiz.state.answers.__region as string)
+                : null
+            }
+            onRegionChange={(v) => wiz.setAnswer("__region", v as never)}
             onStart={wiz.advance}
           />
         ) : isThanks ? (
