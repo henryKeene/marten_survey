@@ -8,6 +8,7 @@ import { Button } from "../components/ui/Button";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { SpeciesRevealPanel } from "../components/ui/SpeciesRevealPanel";
 import { FactCard } from "../components/ui/FactCard";
+import { SectionBanner } from "../components/ui/SectionBanner";
 import { submit, type SubmitResult } from "./submit";
 import { clearState } from "./persistence";
 
@@ -19,6 +20,8 @@ export function SurveyWizard() {
   const isDemographics = wiz.currentStepId === "demographics";
   const isIntro = wiz.currentStepId === "intro";
   const isInteractions = wiz.currentStepId === "interactions";
+  const isRisk = wiz.currentStepId === "risk";
+  const isTolerance = wiz.currentStepId === "tolerance";
 
   const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "error">("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -80,6 +83,23 @@ export function SurveyWizard() {
                 <p className="max-w-prose text-stone-700">{page.intro}</p>
               )}
             </header>
+
+            {isRisk && (
+              <SectionBanner
+                emoji="🎯"
+                callout="Switch it up"
+                body="Now we're sorting cards into risk levels. Drag them around — there's no wrong way."
+                tint="amber"
+              />
+            )}
+            {isTolerance && (
+              <SectionBanner
+                emoji="😊"
+                callout="One more switch"
+                body="Statements about coexisting. Tap the face that best matches how you feel."
+                tint="forest"
+              />
+            )}
 
             <PageRenderer
               page={page}
