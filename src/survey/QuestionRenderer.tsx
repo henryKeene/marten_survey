@@ -45,10 +45,22 @@ const SPECIES_THUMBNAILS: Record<string, string> = {
   badger: "badger.jpg",
 };
 
-/** Big mystery photo per species-ID question. */
+/** Big mystery photo per species-ID question. Only set for "guess" mode
+ *  questions where the photo IS the question. */
 const SPECIES_QUESTION_IMAGE: Record<string, string> = {
   species_f: "species/fox.jpg",
-  species_pm: "species/pm.jpg",
+};
+
+/**
+ * "guess": user is shown a mystery image and picks the species name.
+ * "find":  user is given a species name and picks the matching photo.
+ *
+ * Splitting the two ID questions across modes breaks the monotony of asking
+ * the same question shape twice in a row.
+ */
+const SPECIES_QUESTION_MODE: Record<string, "guess" | "find"> = {
+  species_f: "guess",
+  species_pm: "find",
 };
 
 const PHOTO_GRID_QUESTION_IDS = new Set(["species_f", "species_pm"]);
@@ -350,13 +362,17 @@ function SpeciesIdQuestion({
 }) {
   const [variant, setVariant] = useIdVariant();
   const base = import.meta.env.BASE_URL;
+  const mode = SPECIES_QUESTION_MODE[questionId] ?? "guess";
   const imagePath = SPECIES_QUESTION_IMAGE[questionId];
   const imageSrc = imagePath ? base + imagePath : null;
 
-  // Toggle is shown only on the first ID question (species_f) so it's
-  // discoverable but not repeated on every page.
-  const showToggle = questionId === "species_f";
+  // The variant toggle only makes sense for "guess" mode (mystery image
+  // present, user picks the name). Find mode always uses the grid.
+  const showToggle = mode === "guess" && questionId === "species_f";
+  const isFind = mode === "find";
 
+  // In find mode, the prompt names the species, so we render the grid as the
+  // primary input. In guess mode, the mystery image goes above the input.
   return (
     <section aria-labelledby={labelId} className="space-y-4">
       <FieldLabel id={labelId} required={required}>
@@ -364,17 +380,39 @@ function SpeciesIdQuestion({
       </FieldLabel>
       {hint && <HelperText>{hint}</HelperText>}
 
-      {variant === "grid" ? (
+      {isFind ? (
+        <PhotoGridIdentify
+          choices={choices.map((c) => ({
+            ...c,
+            thumbnail: SPECIES_THUMBNAILS[c.value],
+          }))}
+          value={value}
+          onChange={onChange}
+          ariaLabel={prompt}
+        />
+      ) : variant === "grid" ? (
         <>
           {imageSrc && (
             <figure className="mb-4">
-              <div className="mx-auto aspect-[4/3] max-w-md overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
+              <div className="relative mx-auto aspect-[4/3] w-full max-w-2xl overflow-hidden rounded-3xl border-2 border-stone-200 bg-stone-100 shadow-lg">
                 <img
                   src={imageSrc}
                   alt=""
-                  className="h-full w-full object-cover"
+                  className="h-full w-full animate-mystery-in object-cover"
                   loading="lazy"
                 />
+                <span className="pointer-events-none absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-bold uppercase tracking-wide text-forest-800 shadow">
+                  🔍 Mystery animal
+                </span>
+                <style>{`
+                  @keyframes mystery-in {
+                    0% { transform: scale(1.06); opacity: 0; }
+                    100% { transform: scale(1); opacity: 1; }
+                  }
+                  .animate-mystery-in {
+                    animation: mystery-in 480ms ease-out both;
+                  }
+                `}</style>
               </div>
             </figure>
           )}

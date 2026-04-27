@@ -138,7 +138,7 @@ export const questionPatches: Record<string, QuestionPatch> = {
     prompt: "What animal is this?",
   },
   species_pm: {
-    prompt: "What animal is this?",
+    prompt: "Tap the European pine marten.",
   },
 
   // Confidence sliders: XLSForm uses a `range` (1-10) with no Likert list, so
