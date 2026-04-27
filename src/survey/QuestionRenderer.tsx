@@ -12,6 +12,8 @@ import { SegmentedLikert } from "../components/ui/SegmentedLikert";
 import { SegmentedLikertGroup } from "../components/ui/SegmentedLikertGroup";
 import { ChoiceMatrix } from "../components/ui/ChoiceMatrix";
 import { PhotoGridIdentify } from "../components/ui/PhotoGridIdentify";
+import { DragNameIdentify } from "../components/ui/DragNameIdentify";
+import { useIdVariant } from "../util/use-id-variant";
 
 /** Filename under public/species/ for each species ID choice value. Falls
  *  back to a labelled placeholder when the file is missing. */
@@ -22,6 +24,12 @@ const SPECIES_THUMBNAILS: Record<string, string> = {
   ferret: "ferret.jpg",
   domestic_cat: "domestic_cat.jpg",
   badger: "badger.jpg",
+};
+
+/** Big mystery photo per species-ID question. */
+const SPECIES_QUESTION_IMAGE: Record<string, string> = {
+  species_f: "species/fox.jpg",
+  species_pm: "species/pm.jpg",
 };
 
 const PHOTO_GRID_QUESTION_IDS = new Set(["species_f", "species_pm"]);
@@ -51,33 +59,35 @@ export function QuestionRenderer({ question: q, answers, onAnswer }: Props) {
       );
 
     case "single": {
-      const usePhotoGrid = PHOTO_GRID_QUESTION_IDS.has(q.id);
+      const isIdQuestion = PHOTO_GRID_QUESTION_IDS.has(q.id);
+      if (isIdQuestion) {
+        return (
+          <SpeciesIdQuestion
+            questionId={q.id}
+            prompt={q.prompt}
+            hint={q.hint}
+            required={q.required}
+            choices={q.choices}
+            value={typeof value === "string" ? value : null}
+            onChange={(v) => onAnswer(q.id, v)}
+            labelId={labelId}
+          />
+        );
+      }
       return (
         <section aria-labelledby={labelId} className="space-y-3">
           <FieldLabel id={labelId} required={q.required}>
             <LabelText text={q.prompt} />
           </FieldLabel>
           {q.hint && <HelperText>{q.hint}</HelperText>}
-          {usePhotoGrid ? (
-            <PhotoGridIdentify
-              choices={q.choices.map((c) => ({
-                ...c,
-                thumbnail: SPECIES_THUMBNAILS[c.value],
-              }))}
-              value={typeof value === "string" ? value : null}
-              onChange={(v) => onAnswer(q.id, v)}
-              ariaLabel={q.prompt}
-            />
-          ) : (
-            <RadioGroup
-              name={q.id}
-              choices={q.choices}
-              value={typeof value === "string" ? value : null}
-              onChange={(v) => onAnswer(q.id, v)}
-              layout={q.layout}
-              ariaLabelledby={labelId}
-            />
-          )}
+          <RadioGroup
+            name={q.id}
+            choices={q.choices}
+            value={typeof value === "string" ? value : null}
+            onChange={(v) => onAnswer(q.id, v)}
+            layout={q.layout}
+            ariaLabelledby={labelId}
+          />
         </section>
       );
     }
@@ -249,6 +259,91 @@ export function QuestionRenderer({ question: q, answers, onAnswer }: Props) {
       );
     }
   }
+}
+
+function SpeciesIdQuestion({
+  questionId,
+  prompt,
+  hint,
+  required,
+  choices,
+  value,
+  onChange,
+  labelId,
+}: {
+  questionId: string;
+  prompt: string;
+  hint?: string;
+  required: boolean;
+  choices: { value: string; label: string }[];
+  value: string | null;
+  onChange: (v: string) => void;
+  labelId: string;
+}) {
+  const [variant, setVariant] = useIdVariant();
+  const base = import.meta.env.BASE_URL;
+  const imagePath = SPECIES_QUESTION_IMAGE[questionId];
+  const imageSrc = imagePath ? base + imagePath : null;
+
+  // Toggle is shown only on the first ID question (species_f) so it's
+  // discoverable but not repeated on every page.
+  const showToggle = questionId === "species_f";
+
+  return (
+    <section aria-labelledby={labelId} className="space-y-4">
+      <FieldLabel id={labelId} required={required}>
+        <LabelText text={prompt} />
+      </FieldLabel>
+      {hint && <HelperText>{hint}</HelperText>}
+
+      {variant === "grid" ? (
+        <>
+          {imageSrc && (
+            <figure className="mb-4">
+              <div className="mx-auto aspect-[4/3] max-w-md overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
+                <img
+                  src={imageSrc}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            </figure>
+          )}
+          <PhotoGridIdentify
+            choices={choices.map((c) => ({
+              ...c,
+              thumbnail: SPECIES_THUMBNAILS[c.value],
+            }))}
+            value={value}
+            onChange={onChange}
+            ariaLabel={prompt}
+          />
+        </>
+      ) : (
+        <DragNameIdentify
+          imageSrc={imageSrc}
+          imageAlt=""
+          choices={choices}
+          value={value}
+          onChange={onChange}
+          ariaLabel={prompt}
+        />
+      )}
+
+      {showToggle && (
+        <div className="flex justify-center pt-2">
+          <button
+            type="button"
+            onClick={() => setVariant(variant === "grid" ? "drag" : "grid")}
+            className="text-xs font-medium text-forest-700 underline underline-offset-2 hover:text-forest-800"
+          >
+            🔄 Try the {variant === "grid" ? "drag-and-drop" : "photo-grid"} version
+          </button>
+        </div>
+      )}
+    </section>
+  );
 }
 
 function PostcodeField({

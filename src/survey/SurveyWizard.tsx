@@ -8,7 +8,6 @@ import { Button } from "../components/ui/Button";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { submit, type SubmitResult } from "./submit";
 import { clearState } from "./persistence";
-import { usePageAssetExists } from "../util/use-asset";
 
 export function SurveyWizard() {
   const wiz = useWizard();
@@ -16,14 +15,9 @@ export function SurveyWizard() {
   const isFirst = wiz.currentIndex === 0;
   const isThanks = wiz.currentStepId === "thanks";
   const isDemographics = wiz.currentStepId === "demographics";
-  const isIntro = wiz.currentStepId === "intro";
 
   const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "error">("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  const foxExists = usePageAssetExists("species/fox.jpg");
-  const pmExists = usePageAssetExists("species/pm.jpg");
-  const base = import.meta.env.BASE_URL;
 
   const handleSubmit = async () => {
     setSubmitStatus("submitting");
@@ -46,24 +40,6 @@ export function SurveyWizard() {
   useEffect(() => {
     if (!isDemographics) setSubmitStatus("idle");
   }, [isDemographics]);
-
-  // Per-question inline images on the intro page.
-  const introInlineBefore = isIntro
-    ? {
-      species_f: (
-        <SpeciesPhoto
-          src={foxExists ? base + "species/fox.jpg" : null}
-          letter="A"
-        />
-      ),
-      species_pm: (
-        <SpeciesPhoto
-          src={pmExists ? base + "species/pm.jpg" : null}
-          letter="B"
-        />
-      ),
-    }
-    : undefined;
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-3 py-6 md:gap-8 md:px-4 md:py-12">
@@ -97,7 +73,6 @@ export function SurveyWizard() {
               page={page}
               answers={wiz.state.answers as Record<string, never>}
               onChange={(id, v) => wiz.setAnswer(id, v)}
-              inlineBefore={introInlineBefore}
             />
 
             <nav className="flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-6">
@@ -141,23 +116,3 @@ export function SurveyWizard() {
   );
 }
 
-function SpeciesPhoto({ src, letter }: { src: string | null; letter: "A" | "B" }) {
-  return (
-    <figure className="mb-4">
-      <div className="overflow-hidden rounded-xl border border-stone-200 bg-stone-100 aspect-[4/3] max-w-md mx-auto">
-        {src ? (
-          <img
-            src={src}
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center p-6 text-center text-sm text-stone-500">
-            Photo {letter} placeholder — image file not yet provided.
-          </div>
-        )}
-      </div>
-
-    </figure>
-  );
-}
