@@ -52,6 +52,9 @@ export interface BucketSortItemConfig {
 export interface BucketSortBucketConfig {
   value: number;
   label: string;
+  /** Compact label for the sticky chip row (e.g. "Very low" instead of
+   *  "Very low risk - No noticeable impact..."). */
+  shortLabel: string;
   color: string;
   textColor: string;
 }
@@ -191,30 +194,35 @@ const riskBucketSort: BucketSortConfig = {
     {
       value: 0,
       label: "Very low risk",
+      shortLabel: "Very low",
       color: "bg-emerald-100",
       textColor: "text-emerald-900",
     },
     {
       value: 25,
       label: "Low risk",
+      shortLabel: "Low",
       color: "bg-lime-100",
       textColor: "text-lime-900",
     },
     {
       value: 50,
       label: "Moderate risk",
+      shortLabel: "Moderate",
       color: "bg-amber-100",
       textColor: "text-amber-900",
     },
     {
       value: 75,
       label: "High risk",
+      shortLabel: "High",
       color: "bg-orange-200",
       textColor: "text-orange-900",
     },
     {
       value: 100,
       label: "Very high risk",
+      shortLabel: "Very high",
       color: "bg-red-200",
       textColor: "text-red-900",
     },
