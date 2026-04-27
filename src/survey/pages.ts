@@ -42,6 +42,27 @@ export interface PairedConfig {
   pairs: PairedItem[];
 }
 
+export interface BucketSortItemConfig {
+  id: string;
+  icon?: string;
+  contextLabel: string;
+  species: "pm" | "fox";
+}
+
+export interface BucketSortBucketConfig {
+  value: number;
+  label: string;
+  color: string;
+  textColor: string;
+}
+
+export interface BucketSortConfig {
+  prompt: string;
+  hint?: string;
+  buckets: BucketSortBucketConfig[];
+  items: BucketSortItemConfig[];
+}
+
 export interface WizardPage {
   id: StepId;
   title: string;
@@ -52,6 +73,9 @@ export interface WizardPage {
   /** When present, the page renders this paired view in place of the
    *  question list. Question metadata still drives validation/persistence. */
   paired?: PairedConfig;
+  /** When present, the page renders a bucket-sort interaction. Mutually
+   *  exclusive with `paired`. */
+  bucketSort?: BucketSortConfig;
 }
 
 // Helpers
@@ -137,48 +161,52 @@ const acceptabilityPaired: PairedConfig = {
   ],
 };
 
-const riskPaired: PairedConfig = {
-  prompt: "How much risk do you believe each species poses in these contexts?",
-  leftLabel: "Very low risk",
-  rightLabel: "Very high risk",
-  anchors: RISK_ANCHORS,
-  pairs: [
+const riskBucketSort: BucketSortConfig = {
+  prompt: "Drop each card into the risk level you think it deserves.",
+  hint: "Drag freely — you can move things between levels until you're happy. Or tap a card and pick a level.",
+  buckets: [
     {
-      sharedTitle: "Risk to pets (dogs, cats, rabbits)",
-      pmId: "pm_pet",
-      foxId: "fox_pet",
-      pmLabel: "Pine marten risk to pets",
-      foxLabel: "Fox risk to pets",
+      value: 0,
+      label: "Very low risk",
+      color: "bg-emerald-100",
+      textColor: "text-emerald-900",
     },
     {
-      sharedTitle: "Risk to poultry / gamebirds (chickens, pheasants)",
-      pmId: "pm_poultry",
-      foxId: "fox_poultry",
-      pmLabel: "Pine marten risk to poultry",
-      foxLabel: "Fox risk to poultry",
+      value: 25,
+      label: "Low risk",
+      color: "bg-lime-100",
+      textColor: "text-lime-900",
     },
     {
-      sharedTitle: "Risk to other livestock (sheep, goats, pigs)",
-      pmId: "pm_livestock",
-      foxId: "fox_livestock",
-      pmLabel: "Pine marten risk to livestock",
-      foxLabel: "Fox risk to livestock",
+      value: 50,
+      label: "Moderate risk",
+      color: "bg-amber-100",
+      textColor: "text-amber-900",
     },
     {
-      sharedTitle:
-        "Risk to protected species (red squirrels, ground-nesting birds)",
-      pmId: "pm_protected",
-      foxId: "fox_protected",
-      pmLabel: "Pine marten risk to protected species",
-      foxLabel: "Fox risk to protected species",
+      value: 75,
+      label: "High risk",
+      color: "bg-orange-200",
+      textColor: "text-orange-900",
     },
     {
-      sharedTitle: "Risk of injury to people",
-      pmId: "pm_humans",
-      foxId: "fox_humans",
-      pmLabel: "Pine marten risk to people",
-      foxLabel: "Fox risk to people",
+      value: 100,
+      label: "Very high risk",
+      color: "bg-red-200",
+      textColor: "text-red-900",
     },
+  ],
+  items: [
+    { id: "pm_pet", icon: "🐾", contextLabel: "Pets", species: "pm" },
+    { id: "fox_pet", icon: "🐾", contextLabel: "Pets", species: "fox" },
+    { id: "pm_poultry", icon: "🐔", contextLabel: "Poultry / gamebirds", species: "pm" },
+    { id: "fox_poultry", icon: "🐔", contextLabel: "Poultry / gamebirds", species: "fox" },
+    { id: "pm_livestock", icon: "🐑", contextLabel: "Livestock", species: "pm" },
+    { id: "fox_livestock", icon: "🐑", contextLabel: "Livestock", species: "fox" },
+    { id: "pm_protected", icon: "🐿️", contextLabel: "Protected species", species: "pm" },
+    { id: "fox_protected", icon: "🐿️", contextLabel: "Protected species", species: "fox" },
+    { id: "pm_humans", icon: "🚶", contextLabel: "People", species: "pm" },
+    { id: "fox_humans", icon: "🚶", contextLabel: "People", species: "fox" },
   ],
 };
 
@@ -297,9 +325,9 @@ export const wizardPages: WizardPage[] = [
     id: "risk",
     title: "Perceived risk",
     intro:
-      "Now five different contexts. How much risk do you think each species poses in each one?",
+      "Now five different contexts. Drag each card into the risk level you think it deserves.",
     questions: riskQuestions,
-    paired: riskPaired,
+    bucketSort: riskBucketSort,
   },
   {
     id: "tolerance",

@@ -2,6 +2,7 @@ import type { Question, AnswerValue } from "./schema-types";
 import { QuestionRenderer } from "./QuestionRenderer";
 import type { WizardPage } from "./pages";
 import { PairedSegmentedLikert } from "../components/ui/PairedSegmentedLikert";
+import { BucketSortMatrix } from "../components/ui/BucketSortMatrix";
 
 interface PageRendererProps {
   page: WizardPage;
@@ -11,6 +12,24 @@ interface PageRendererProps {
 }
 
 export function PageRenderer({ page, answers, onChange, inlineBefore }: PageRendererProps) {
+  if (page.bucketSort) {
+    const values: Record<string, number | null> = {};
+    for (const item of page.bucketSort.items) {
+      const v = answers[item.id];
+      values[item.id] = typeof v === "number" ? v : null;
+    }
+    return (
+      <BucketSortMatrix
+        prompt={page.bucketSort.prompt}
+        hint={page.bucketSort.hint}
+        buckets={page.bucketSort.buckets}
+        items={page.bucketSort.items}
+        values={values}
+        onChange={onChange}
+      />
+    );
+  }
+
   if (page.paired) {
     const values: Record<string, number | null> = {};
     for (const pair of page.paired.pairs) {
