@@ -63,6 +63,26 @@ export interface BucketSortConfig {
   items: BucketSortItemConfig[];
 }
 
+export interface EmojiAnchor {
+  value: number;
+  emoji: string;
+  label: string;
+}
+
+export interface EmojiReactionPairConfig {
+  sharedTitle: string;
+  icon?: string;
+  pmId: string;
+  foxId: string;
+}
+
+export interface EmojiReactionConfig {
+  prompt: string;
+  hint?: string;
+  emojis: EmojiAnchor[];
+  pairs: EmojiReactionPairConfig[];
+}
+
 export interface WizardPage {
   id: StepId;
   title: string;
@@ -76,6 +96,9 @@ export interface WizardPage {
   /** When present, the page renders a bucket-sort interaction. Mutually
    *  exclusive with `paired`. */
   bucketSort?: BucketSortConfig;
+  /** When present, the page renders an emoji-reaction picker. Mutually
+   *  exclusive with `paired` and `bucketSort`. */
+  emojiReaction?: EmojiReactionConfig;
 }
 
 // Helpers
@@ -210,51 +233,51 @@ const riskBucketSort: BucketSortConfig = {
   ],
 };
 
-const tolerancePaired: PairedConfig = {
+const toleranceEmoji: EmojiReactionConfig = {
   prompt: "How much do you agree with these statements about each species?",
-  leftLabel: "Strongly disagree",
-  rightLabel: "Strongly agree",
-  anchors: AGREEMENT_ANCHORS,
+  hint: "Tap the face that best matches your view, for each species.",
+  emojis: [
+    { value: 0, emoji: "😠", label: "Strongly disagree" },
+    { value: 25, emoji: "😟", label: "Disagree" },
+    { value: 50, emoji: "😐", label: "Neutral" },
+    { value: 75, emoji: "🙂", label: "Agree" },
+    { value: 100, emoji: "😊", label: "Strongly agree" },
+  ],
   pairs: [
     {
+      icon: "🌱",
       sharedTitle:
         "Provides ecological benefits that make their presence worthwhile (e.g., controlling pests like rodents, helping seed dispersal)",
       pmId: "pm_benefits",
       foxId: "fox_benefits",
-      pmLabel: "Pine marten benefits",
-      foxLabel: "Fox benefits",
     },
     {
+      icon: "🤝",
       sharedTitle:
         "I am willing to tolerate some inconvenience to allow them in my local area (e.g., minor garden damage)",
       pmId: "pm_tolerate",
       foxId: "fox_tolerate",
-      pmLabel: "Tolerate pine marten",
-      foxLabel: "Tolerate fox",
     },
     {
+      icon: "🛡️",
       sharedTitle:
         "I would take steps to make interactions less likely (e.g., securing bins, electric fencing for poultry)",
       pmId: "pm_prevent",
       foxId: "fox_prevent",
-      pmLabel: "Prevent pine marten interactions",
-      foxLabel: "Prevent fox interactions",
     },
     {
+      icon: "🌿",
       sharedTitle:
         "Non-lethal methods should be used to manage them (e.g., deterrents, artificial den boxes)",
       pmId: "pm_nonlethal",
       foxId: "fox_nonlethal",
-      pmLabel: "Non-lethal management for pine marten",
-      foxLabel: "Non-lethal management for fox",
     },
     {
+      icon: "⚖️",
       sharedTitle:
         "Lethal control should be permitted if they cause significant or persistent damage / losses",
       pmId: "pm_lethal",
       foxId: "fox_lethal",
-      pmLabel: "Lethal control of pine marten",
-      foxLabel: "Lethal control of fox",
     },
   ],
 };
@@ -333,9 +356,9 @@ export const wizardPages: WizardPage[] = [
     id: "tolerance",
     title: "Living alongside them",
     intro:
-      "Five short statements about coexisting with these species. Tap how much you agree or disagree for each one.",
+      "Five short statements about coexisting with these species. Tap the face that best matches how you feel — for each species.",
     questions: toleranceQuestions,
-    paired: tolerancePaired,
+    emojiReaction: toleranceEmoji,
   },
   {
     id: "interactions",

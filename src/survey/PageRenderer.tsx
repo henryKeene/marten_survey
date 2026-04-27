@@ -3,6 +3,7 @@ import { QuestionRenderer } from "./QuestionRenderer";
 import type { WizardPage } from "./pages";
 import { PairedSegmentedLikert } from "../components/ui/PairedSegmentedLikert";
 import { BucketSortMatrix } from "../components/ui/BucketSortMatrix";
+import { EmojiReactionMatrix } from "../components/ui/EmojiReactionMatrix";
 
 interface PageRendererProps {
   page: WizardPage;
@@ -12,6 +13,26 @@ interface PageRendererProps {
 }
 
 export function PageRenderer({ page, answers, onChange, inlineBefore }: PageRendererProps) {
+  if (page.emojiReaction) {
+    const values: Record<string, number | null> = {};
+    for (const pair of page.emojiReaction.pairs) {
+      const pm = answers[pair.pmId];
+      const fox = answers[pair.foxId];
+      values[pair.pmId] = typeof pm === "number" ? pm : null;
+      values[pair.foxId] = typeof fox === "number" ? fox : null;
+    }
+    return (
+      <EmojiReactionMatrix
+        prompt={page.emojiReaction.prompt}
+        hint={page.emojiReaction.hint}
+        emojis={page.emojiReaction.emojis}
+        pairs={page.emojiReaction.pairs}
+        values={values}
+        onChange={onChange}
+      />
+    );
+  }
+
   if (page.bucketSort) {
     const values: Record<string, number | null> = {};
     for (const item of page.bucketSort.items) {
