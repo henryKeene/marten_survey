@@ -6,6 +6,7 @@ import { WelcomePage } from "../pages/WelcomePage";
 import { ThankYouPage } from "../pages/ThankYouPage";
 import { Button } from "../components/ui/Button";
 import { ProgressBar } from "../components/ui/ProgressBar";
+import { SpeciesRevealPanel } from "../components/ui/SpeciesRevealPanel";
 import { submit, type SubmitResult } from "./submit";
 import { clearState } from "./persistence";
 
@@ -15,6 +16,7 @@ export function SurveyWizard() {
   const isFirst = wiz.currentIndex === 0;
   const isThanks = wiz.currentStepId === "thanks";
   const isDemographics = wiz.currentStepId === "demographics";
+  const isIntro = wiz.currentStepId === "intro";
 
   const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "error">("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -74,6 +76,8 @@ export function SurveyWizard() {
               answers={wiz.state.answers as Record<string, never>}
               onChange={(id, v) => wiz.setAnswer(id, v)}
             />
+
+            {isIntro && <SpeciesRevealPanel answers={wiz.state.answers} />}
 
             <nav className="flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-6">
               <Button variant="secondary" size="lg" onClick={wiz.goBack} disabled={isFirst}>
