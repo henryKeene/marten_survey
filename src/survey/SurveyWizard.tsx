@@ -52,6 +52,8 @@ export function SurveyWizard() {
           current={wiz.currentIndex}
           total={wiz.totalSteps}
           label={page.title}
+          meaningfulCurrent={wiz.currentIndex}
+          meaningfulTotal={wiz.totalSteps - 2}
         />
       )}
 
