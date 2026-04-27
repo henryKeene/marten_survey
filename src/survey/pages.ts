@@ -275,27 +275,30 @@ export const wizardPages: WizardPage[] = [
     id: "intro",
     title: "About the animals",
     intro:
-      "We would like to start by asking a few questions about your familiarity with the animals we are studying.",
+      "First, a couple of quick questions to see how familiar you are with each species.",
     questions: introQuestions,
   },
   {
     id: "acceptability",
-    title: "Acceptability",
-    intro: "",
+    title: "What feels acceptable?",
+    intro:
+      "Five quick scenarios — there are no right or wrong answers. Tap how acceptable each one feels for each species.",
     questions: acceptabilityQuestions,
     paired: acceptabilityPaired,
   },
   {
     id: "risk",
     title: "Perceived risk",
-    intro: "",
+    intro:
+      "Now five different contexts. How much risk do you think each species poses in each one?",
     questions: riskQuestions,
     paired: riskPaired,
   },
   {
     id: "tolerance",
-    title: "Tolerance and management",
-    intro: "",
+    title: "Living alongside them",
+    intro:
+      "Five short statements about coexisting with these species. Tap how much you agree or disagree for each one.",
     questions: toleranceQuestions,
     paired: tolerancePaired,
   },
@@ -303,14 +306,14 @@ export const wizardPages: WizardPage[] = [
     id: "interactions",
     title: "Your experiences",
     intro:
-      "",
+      "Tell us about any encounters you've had — none of this is required, share whatever you remember.",
     questions: interactionsQuestions,
   },
   {
     id: "demographics",
     title: "A little about you",
     intro:
-      "These final questions help us understand how views vary. All answers remain anonymous.",
+      "Last few questions to help us understand how views vary across Ireland. Everything stays anonymous.",
     questions: demographicsQuestions,
   },
   {

@@ -135,23 +135,21 @@ export const questionPatches: Record<string, QuestionPatch> = {
   // Species-ID prompts: generator pulls "Photo A / Photo B" verbatim from the
   // XLSForm; the live form shows the image directly above the question.
   species_f: {
-    prompt: "Please identify the animal in the photo above from the options below?",
+    prompt: "What animal is this?",
   },
   species_pm: {
-    prompt: "Please identify the animal in the photo above from the options below?",
+    prompt: "What animal is this?",
   },
 
   // Confidence sliders: XLSForm uses a `range` (1-10) with no Likert list, so
   // the generator emits anchors=[]. We want the 5-anchor scale the UI knows
   // how to render.
   confidence_f: {
-    prompt:
-      "How confident are you that you could recognise this animal if you saw it in person?",
+    prompt: "How confident are you that you'd recognise this one in the wild?",
     anchors: CONFIDENCE_ANCHORS,
   },
   confidence_pm: {
-    prompt:
-      "How confident are you that you could recognise this animal if you saw it in person?",
+    prompt: "How confident are you that you'd recognise this one in the wild?",
     anchors: CONFIDENCE_ANCHORS,
   },
 
@@ -172,7 +170,7 @@ export const questionPatches: Record<string, QuestionPatch> = {
   // appear inline directly under the row they relate to.
   sp_local_matrix: {
     prompt:
-      "Which of the following experiences have you had with these animals? (select all that apply; choose Neither if none)",
+      "Tick any of these you've experienced with each species. Choose Neither if none apply.",
     multi: true,
     exclusive: "neither",
     choices: [
@@ -208,9 +206,41 @@ export const questionPatches: Record<string, QuestionPatch> = {
   sp_losses_exp_fox: { visibleIfBody: expPredicate("sp_losses", "fox") },
 
   // Losses-gated follow-ups: same helper-based predicate.
-  season: { visibleIfBody: hasLossesPredicate },
-  loss_details: { visibleIfBody: hasLossesPredicate },
-  signs_losses: { visibleIfBody: hasLossesPredicate },
+  season: {
+    prompt: "Which seasons did these happen in? (tick all that apply)",
+    visibleIfBody: hasLossesPredicate,
+  },
+  loss_details: {
+    prompt:
+      "If you're comfortable, share what was lost — type of animals and roughly how many.",
+    visibleIfBody: hasLossesPredicate,
+  },
+  signs_losses: {
+    prompt: "Were there any signs that told you which animal caused the loss?",
+    visibleIfBody: hasLossesPredicate,
+  },
+
+  // Demographics — gentler phrasing.
+  postcode: {
+    prompt: "Where do you live? (Eircode or postcode)",
+    hint: "This helps us see how views vary across Ireland. Your response stays anonymous.",
+  },
+  job: { prompt: "What industry do you work in?" },
+  hobbies: {
+    prompt: "What are you into? (hobby, personal interest, or work — tick all that apply)",
+  },
+  comments: {
+    prompt: "Anything else you'd like to share?",
+  },
+
+  // Free-text interaction prompts.
+  other_interactions: {
+    prompt: "Anything else? Other interactions you've had with foxes or pine martens.",
+  },
+  other_sp_interactions: {
+    prompt:
+      "Any encounters with other Irish wildlife you'd like to mention? (any species)",
+  },
 };
 
 const PM_PROMPT = "Pine marten — how did you feel about this?";

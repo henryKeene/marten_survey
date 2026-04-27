@@ -43,7 +43,7 @@ export const questions: Question[] = [
   {
     id: "species_f",
     kind: "single",
-    prompt: "Please identify the animal in the photo above from the options below?",
+    prompt: "What animal is this?",
     required: false,
     choices: [{"value":"pine_marten","label":"Pine marten"},{"value":"fox","label":"Fox"},{"value":"stoat","label":"Stoat"},{"value":"ferret","label":"Ferret"},{"value":"domestic_cat","label":"Domestic cat"},{"value":"badger","label":"Badger"},{"value":"not_sure","label":"Not sure / I don’t know"}],
     layout: "horizontal",
@@ -51,7 +51,7 @@ export const questions: Question[] = [
   {
     id: "confidence_f",
     kind: "slider",
-    prompt: "How confident are you that you could recognise this animal if you saw it in person?",
+    prompt: "How confident are you that you'd recognise this one in the wild?",
     required: false,
     leftLabel: "Not at all confident",
     rightLabel: "Very confident",
@@ -60,7 +60,7 @@ export const questions: Question[] = [
   {
     id: "species_pm",
     kind: "single",
-    prompt: "Please identify the animal in the photo above from the options below?",
+    prompt: "What animal is this?",
     required: false,
     choices: [{"value":"pine_marten","label":"Pine marten"},{"value":"fox","label":"Fox"},{"value":"stoat","label":"Stoat"},{"value":"ferret","label":"Ferret"},{"value":"domestic_cat","label":"Domestic cat"},{"value":"badger","label":"Badger"},{"value":"not_sure","label":"Not sure / I don’t know"}],
     layout: "horizontal",
@@ -68,7 +68,7 @@ export const questions: Question[] = [
   {
     id: "confidence_pm",
     kind: "slider",
-    prompt: "How confident are you that you could recognise this animal if you saw it in person?",
+    prompt: "How confident are you that you'd recognise this one in the wild?",
     required: false,
     leftLabel: "Not at all confident",
     rightLabel: "Very confident",
@@ -146,7 +146,7 @@ export const questions: Question[] = [
   {
     id: "sp_local_matrix",
     kind: "choice-matrix",
-    prompt: "Which of the following experiences have you had with these animals? (select all that apply; choose Neither if none)",
+    prompt: "Tick any of these you've experienced with each species. Choose Neither if none apply.",
     required: false,
     multi: true,
     exclusive: "neither",
@@ -157,7 +157,7 @@ export const questions: Question[] = [
   {
     id: "other_interactions",
     kind: "text",
-    prompt: "If you have experienced  any other interactions with these animals please leave details below",
+    prompt: "Anything else? Other interactions you've had with foxes or pine martens.",
     required: false,
     multiline: true,
   },
@@ -308,7 +308,7 @@ export const questions: Question[] = [
   {
     id: "season",
     kind: "multi",
-    prompt: "If you can remember, please tell us what time of the year (s) these experiences happened.",
+    prompt: "Which seasons did these happen in? (tick all that apply)",
     hint: "[object Object]",
     required: false,
     choices: [{"value":"spring","label":"Spring (March–May)"},{"value":"summer","label":"Summer (June–August)"},{"value":"autumn","label":"Autumn (September–November)"},{"value":"winter","label":"Winter (December–February)"},{"value":"unsure","label":"Not sure"}],
@@ -317,7 +317,7 @@ export const questions: Question[] = [
   {
     id: "loss_details",
     kind: "text",
-    prompt: "Where you have suffered animal losses, please provide details where you feel comfortable, including the type of animals lost and the number for each occasion, where possible.",
+    prompt: "If you're comfortable, share what was lost — type of animals and roughly how many.",
     required: false,
     multiline: true,
     visibleIf: (answers: Answers) => hasSpecies(answers["sp_losses"], "pm") || hasSpecies(answers["sp_losses"], "fox"),
@@ -325,7 +325,7 @@ export const questions: Question[] = [
   {
     id: "signs_losses",
     kind: "text",
-    prompt: "Where there any signs that told you this animal caused the loss?",
+    prompt: "Were there any signs that told you which animal caused the loss?",
     hint: "(Please describe anything that helped you identify the animal. For example: tracks, droppings, bite marks, or seeing the animal)",
     required: false,
     multiline: true,
@@ -334,7 +334,7 @@ export const questions: Question[] = [
   {
     id: "other_sp_interactions",
     kind: "text",
-    prompt: "If you have any other interactions with animals on the island of Ireland you would like to share, please do so here (this may be other species not mentioned in this survey). ",
+    prompt: "Any encounters with other Irish wildlife you'd like to mention? (any species)",
     required: false,
     multiline: true,
   },
@@ -357,8 +357,8 @@ export const questions: Question[] = [
   {
     id: "postcode",
     kind: "text",
-    prompt: "Please enter the Eircode or postcode of where you currently live. ",
-    hint: "This helps us understand how views and experiences may vary across different parts of the island of Ireland. As stated at the beginning, your response will remain anonymous.",
+    prompt: "Where do you live? (Eircode or postcode)",
+    hint: "This helps us see how views vary across Ireland. Your response stays anonymous.",
     required: false,
     multiline: false,
     validate: "postcode-ie-ni",
@@ -366,7 +366,7 @@ export const questions: Question[] = [
   {
     id: "job",
     kind: "single",
-    prompt: "Which of the following best describes the industry you currently work in?",
+    prompt: "What industry do you work in?",
     required: false,
     choices: [{"value":"agri","label":"Agriculture, Forestry & Fishing"},{"value":"manuf","label":"Manufacturing"},{"value":"constr","label":"Construction"},{"value":"retail","label":"Wholesale & Retail Trade"},{"value":"transp","label":"Transportation & Storage"},{"value":"info","label":"Information & Communication"},{"value":"finance","label":"Finance & Insurance"},{"value":"prof","label":"Professional, Scientific & Technical"},{"value":"educ","label":"Education"},{"value":"health","label":"Health & Social Work"},{"value":"public","label":"Public Administration"},{"value":"arts","label":"Arts, Entertainment & Recreation"},{"value":"accom","label":"Accommodation & Food Service"},{"value":"other","label":"Other"},{"value":"pnts","label":"Prefer not to say"}],
     layout: "horizontal",
@@ -374,7 +374,7 @@ export const questions: Question[] = [
   {
     id: "hobbies",
     kind: "multi",
-    prompt: "Which of the following areas do you have an interest in, either as a hobby, personal activity, or professional involvement? ",
+    prompt: "What are you into? (hobby, personal interest, or work — tick all that apply)",
     hint: "(Select all that apply)",
     required: false,
     choices: [{"value":"comm","label":"Community or group activities"},{"value":"soc","label":"Socialising with friends or family"},{"value":"arts","label":"Arts, culture or events"},{"value":"relax","label":"Relaxing or quiet time"},{"value":"sport","label":"Exercise or sport"},{"value":"outdoor","label":"Outdoor recreation"},{"value":"country","label":"Countryside pursuits"},{"value":"creative","label":"Creative hobbies"},{"value":"digital","label":"Digital entertainment"},{"value":"eatout","label":"Eating out"},{"value":"other","label":"Other"}],
@@ -382,7 +382,7 @@ export const questions: Question[] = [
   {
     id: "comments",
     kind: "text",
-    prompt: "If you have any additional comments, feedback or notes please leave them here.",
+    prompt: "Anything else you'd like to share?",
     required: false,
     multiline: true,
   }
