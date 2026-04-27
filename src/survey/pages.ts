@@ -22,6 +22,8 @@ export type StepId =
 export interface PairedItem {
   /** Shared description shown once at the top of the card. Optional. */
   sharedTitle?: string;
+  /** Optional emoji icon rendered before the shared title. */
+  icon?: string;
   pmId: string;
   foxId: string;
   pmLabel: string;
@@ -93,6 +95,7 @@ const acceptabilityPaired: PairedConfig = {
   anchors: ACCEPTABILITY_ANCHORS,
   pairs: [
     {
+      icon: "🌲",
       sharedTitle: "Seen in its natural habitat (e.g., woodland)",
       pmId: "pm_a",
       foxId: "fox_a",
@@ -100,6 +103,7 @@ const acceptabilityPaired: PairedConfig = {
       foxLabel: "Fox in woodland",
     },
     {
+      icon: "🏡",
       sharedTitle: "Seen around homes or farms (gardens, yards, farmyards)",
       pmId: "pm_b",
       foxId: "fox_b",
@@ -107,6 +111,7 @@ const acceptabilityPaired: PairedConfig = {
       foxLabel: "Fox around homes / farms",
     },
     {
+      icon: "🛏️",
       sharedTitle: "Has denned (lived or slept) in a house",
       pmId: "pm_c",
       foxId: "fox_c",
@@ -114,6 +119,7 @@ const acceptabilityPaired: PairedConfig = {
       foxLabel: "Fox denning in a house",
     },
     {
+      icon: "🐔",
       sharedTitle: "Has attacked poultry or gamebirds",
       pmId: "pm_d",
       foxId: "fox_d",
@@ -121,6 +127,7 @@ const acceptabilityPaired: PairedConfig = {
       foxLabel: "Fox attacking poultry / gamebirds",
     },
     {
+      icon: "🗑️",
       sharedTitle: "Has been seen eating from a bin",
       pmId: "pm_e",
       foxId: "fox_e",

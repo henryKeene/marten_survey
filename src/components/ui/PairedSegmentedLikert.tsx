@@ -6,6 +6,8 @@ export interface PairedItem {
   /** Shared description shown once at the top of the card. Optional — when
    *  absent, only the per-species labels appear. */
   sharedTitle?: string;
+  /** Optional emoji icon rendered before the shared title for visual rhythm. */
+  icon?: string;
   pmId: string;
   foxId: string;
   pmLabel: string;
@@ -80,9 +82,19 @@ export function PairedSegmentedLikert({
             className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm md:p-5"
           >
             {pair.sharedTitle && (
-              <p className="mb-4 text-sm font-semibold text-stone-900 leading-snug">
-                <LabelText text={pair.sharedTitle} />
-              </p>
+              <div className="mb-4 flex items-start gap-3">
+                {pair.icon && (
+                  <span
+                    aria-hidden="true"
+                    className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-forest-50 text-lg"
+                  >
+                    {pair.icon}
+                  </span>
+                )}
+                <p className="flex-1 text-sm font-semibold text-stone-900 leading-snug md:text-base">
+                  <LabelText text={pair.sharedTitle} />
+                </p>
+              </div>
             )}
             <SpeciesRow
               dotClass={PM_DOT}
