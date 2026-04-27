@@ -11,9 +11,26 @@ import { RiskSlider } from "../components/ui/RiskSlider";
 import { SegmentedLikert } from "../components/ui/SegmentedLikert";
 import { SegmentedLikertGroup } from "../components/ui/SegmentedLikertGroup";
 import { ChoiceMatrix } from "../components/ui/ChoiceMatrix";
+import { CardFlowMatrix } from "../components/ui/CardFlowMatrix";
 import { PhotoGridIdentify } from "../components/ui/PhotoGridIdentify";
 import { DragNameIdentify } from "../components/ui/DragNameIdentify";
 import { useIdVariant } from "../util/use-id-variant";
+
+/** Friendly icons for the card-flow interactions matrix. Keyed by item id. */
+const SP_LOCAL_MATRIX_ICONS: Record<string, string> = {
+  sp_local: "🌲",
+  sp_property: "🏡",
+  sp_denning: "🛏️",
+  sp_bins: "🗑️",
+  sp_damage: "🔨",
+  sp_losses: "🐓",
+};
+
+const SP_LOCAL_MATRIX_DOTS: Record<string, string> = {
+  fox: "bg-amber",
+  pm: "bg-forest-600",
+  neither: "bg-stone-400",
+};
 
 /** Filename under public/species/ for each species ID choice value. Falls
  *  back to a labelled placeholder when the file is missing. */
@@ -184,45 +201,65 @@ export function QuestionRenderer({ question: q, answers, onAnswer }: Props) {
           values[item.id] = typeof v === "string" ? v : null;
         }
       }
+      const renderAfterRow = q.followUps
+        ? (itemId: string) => {
+            const selected = values[itemId];
+            if (!Array.isArray(selected) || selected.length === 0) return null;
+            const map = q.followUps![itemId] ?? {};
+            return selected.flatMap((choiceValue) => {
+              const followId = map[choiceValue];
+              if (!followId) return [];
+              const followQ = questionsById[followId];
+              if (!followQ) return [];
+              return [
+                <QuestionRenderer
+                  key={followId}
+                  question={followQ}
+                  answers={answers}
+                  onAnswer={onAnswer}
+                />,
+              ];
+            });
+          }
+        : undefined;
+      // Multi-select matrices get the roomier card-flow layout. Single-select
+      // matrices (e.g. seen_pm_matrix) stay on the compact ChoiceMatrix since
+      // they already read fine on mobile.
+      const useCardFlow = q.multi === true;
       return (
         <section aria-labelledby={labelId} className="space-y-4">
           <span id={labelId} className="sr-only">
             {q.prompt}
           </span>
-          <ChoiceMatrix
-            prompt={q.prompt}
-            hint={q.hint}
-            items={q.items}
-            choices={q.choices}
-            multi={q.multi}
-            exclusive={q.exclusive}
-            values={values}
-            onChange={(itemId, v) => onAnswer(itemId, v)}
-            required={q.required}
-            renderAfterRow={
-              q.followUps
-                ? (itemId) => {
-                    const selected = values[itemId];
-                    if (!Array.isArray(selected) || selected.length === 0) return null;
-                    const map = q.followUps![itemId] ?? {};
-                    return selected.flatMap((choiceValue) => {
-                      const followId = map[choiceValue];
-                      if (!followId) return [];
-                      const followQ = questionsById[followId];
-                      if (!followQ) return [];
-                      return [
-                        <QuestionRenderer
-                          key={followId}
-                          question={followQ}
-                          answers={answers}
-                          onAnswer={onAnswer}
-                        />,
-                      ];
-                    });
-                  }
-                : undefined
-            }
-          />
+          {useCardFlow ? (
+            <CardFlowMatrix
+              prompt={q.prompt}
+              hint={q.hint}
+              items={q.items}
+              choices={q.choices}
+              multi={q.multi}
+              exclusive={q.exclusive}
+              values={values}
+              onChange={(itemId, v) => onAnswer(itemId, v)}
+              required={q.required}
+              renderAfterRow={renderAfterRow}
+              itemIcons={q.id === "sp_local_matrix" ? SP_LOCAL_MATRIX_ICONS : undefined}
+              choiceDots={q.id === "sp_local_matrix" ? SP_LOCAL_MATRIX_DOTS : undefined}
+            />
+          ) : (
+            <ChoiceMatrix
+              prompt={q.prompt}
+              hint={q.hint}
+              items={q.items}
+              choices={q.choices}
+              multi={q.multi}
+              exclusive={q.exclusive}
+              values={values}
+              onChange={(itemId, v) => onAnswer(itemId, v)}
+              required={q.required}
+              renderAfterRow={renderAfterRow}
+            />
+          )}
         </section>
       );
     }
