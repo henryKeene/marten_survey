@@ -43,7 +43,7 @@ export const questions: Question[] = [
   {
     id: "species_f",
     kind: "single",
-    prompt: "What animal is this?",
+    prompt: "Tap the red fox.",
     required: false,
     choices: [{"value":"pine_marten","label":"Pine marten"},{"value":"fox","label":"Fox"},{"value":"stoat","label":"Stoat"},{"value":"ferret","label":"Ferret"},{"value":"domestic_cat","label":"Domestic cat"},{"value":"badger","label":"Badger"},{"value":"not_sure","label":"Not sure / I don’t know"}],
     layout: "horizontal",

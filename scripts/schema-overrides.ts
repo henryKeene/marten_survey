@@ -135,7 +135,7 @@ export const questionPatches: Record<string, QuestionPatch> = {
   // Species-ID prompts: generator pulls "Photo A / Photo B" verbatim from the
   // XLSForm; the live form shows the image directly above the question.
   species_f: {
-    prompt: "What animal is this?",
+    prompt: "Tap the red fox.",
   },
   species_pm: {
     prompt: "Tap the European pine marten.",

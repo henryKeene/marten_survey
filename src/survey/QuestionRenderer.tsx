@@ -15,8 +15,6 @@ import { SegmentedLikertGroup } from "../components/ui/SegmentedLikertGroup";
 import { ChoiceMatrix } from "../components/ui/ChoiceMatrix";
 import { CardFlowMatrix } from "../components/ui/CardFlowMatrix";
 import { PhotoGridIdentify } from "../components/ui/PhotoGridIdentify";
-import { DragNameIdentify } from "../components/ui/DragNameIdentify";
-import { useIdVariant } from "../util/use-id-variant";
 
 /** Friendly icons for the card-flow interactions matrix. Keyed by item id. */
 const SP_LOCAL_MATRIX_ICONS: Record<string, string> = {
@@ -43,24 +41,6 @@ const SPECIES_THUMBNAILS: Record<string, string> = {
   ferret: "ferret.jpg",
   domestic_cat: "domestic_cat.jpg",
   badger: "badger.jpg",
-};
-
-/** Big mystery photo per species-ID question. Only set for "guess" mode
- *  questions where the photo IS the question. */
-const SPECIES_QUESTION_IMAGE: Record<string, string> = {
-  species_f: "species/fox.jpg",
-};
-
-/**
- * "guess": user is shown a mystery image and picks the species name.
- * "find":  user is given a species name and picks the matching photo.
- *
- * Splitting the two ID questions across modes breaks the monotony of asking
- * the same question shape twice in a row.
- */
-const SPECIES_QUESTION_MODE: Record<string, "guess" | "find"> = {
-  species_f: "guess",
-  species_pm: "find",
 };
 
 const PHOTO_GRID_QUESTION_IDS = new Set(["species_f", "species_pm"]);
@@ -342,7 +322,6 @@ export function QuestionRenderer({ question: q, answers, onAnswer }: Props) {
 }
 
 function SpeciesIdQuestion({
-  questionId,
   prompt,
   hint,
   required,
@@ -360,94 +339,27 @@ function SpeciesIdQuestion({
   onChange: (v: string) => void;
   labelId: string;
 }) {
-  const [variant, setVariant] = useIdVariant();
-  const base = import.meta.env.BASE_URL;
-  const mode = SPECIES_QUESTION_MODE[questionId] ?? "guess";
-  const imagePath = SPECIES_QUESTION_IMAGE[questionId];
-  const imageSrc = imagePath ? base + imagePath : null;
-
-  // The variant toggle only makes sense for "guess" mode (mystery image
-  // present, user picks the name). Find mode always uses the grid.
-  const showToggle = mode === "guess" && questionId === "species_f";
-  const isFind = mode === "find";
-
-  // In find mode, the prompt names the species, so we render the grid as the
-  // primary input. In guess mode, the mystery image goes above the input.
+  // Both species-ID questions are now "tap the X" style: the prompt names
+  // the species, and the user has to recognise it visually from a grid of
+  // photos. Labels under tiles are hidden so the question can't be answered
+  // by reading — placeholder tiles keep their label as a fallback so the
+  // survey is still navigable when not all species photos are provided.
   return (
     <section aria-labelledby={labelId} className="space-y-4">
       <FieldLabel id={labelId} required={required}>
         <LabelText text={prompt} />
       </FieldLabel>
       {hint && <HelperText>{hint}</HelperText>}
-
-      {isFind ? (
-        <PhotoGridIdentify
-          choices={choices.map((c) => ({
-            ...c,
-            thumbnail: SPECIES_THUMBNAILS[c.value],
-          }))}
-          value={value}
-          onChange={onChange}
-          ariaLabel={prompt}
-        />
-      ) : variant === "grid" ? (
-        <>
-          {imageSrc && (
-            <figure className="mb-4">
-              <div className="relative mx-auto aspect-[4/3] w-full max-w-2xl overflow-hidden rounded-3xl border-2 border-stone-200 bg-stone-100 shadow-lg">
-                <img
-                  src={imageSrc}
-                  alt=""
-                  className="h-full w-full animate-mystery-in object-cover"
-                  loading="lazy"
-                />
-                <span className="pointer-events-none absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-bold uppercase tracking-wide text-forest-800 shadow">
-                  🔍 Mystery animal
-                </span>
-                <style>{`
-                  @keyframes mystery-in {
-                    0% { transform: scale(1.06); opacity: 0; }
-                    100% { transform: scale(1); opacity: 1; }
-                  }
-                  .animate-mystery-in {
-                    animation: mystery-in 480ms ease-out both;
-                  }
-                `}</style>
-              </div>
-            </figure>
-          )}
-          <PhotoGridIdentify
-            choices={choices.map((c) => ({
-              ...c,
-              thumbnail: SPECIES_THUMBNAILS[c.value],
-            }))}
-            value={value}
-            onChange={onChange}
-            ariaLabel={prompt}
-          />
-        </>
-      ) : (
-        <DragNameIdentify
-          imageSrc={imageSrc}
-          imageAlt=""
-          choices={choices}
-          value={value}
-          onChange={onChange}
-          ariaLabel={prompt}
-        />
-      )}
-
-      {showToggle && (
-        <div className="flex justify-center pt-2">
-          <button
-            type="button"
-            onClick={() => setVariant(variant === "grid" ? "drag" : "grid")}
-            className="text-xs font-medium text-forest-700 underline underline-offset-2 hover:text-forest-800"
-          >
-            🔄 Try the {variant === "grid" ? "drag-and-drop" : "photo-grid"} version
-          </button>
-        </div>
-      )}
+      <PhotoGridIdentify
+        choices={choices.map((c) => ({
+          ...c,
+          thumbnail: SPECIES_THUMBNAILS[c.value],
+        }))}
+        value={value}
+        onChange={onChange}
+        ariaLabel={prompt}
+        hideLabels
+      />
     </section>
   );
 }

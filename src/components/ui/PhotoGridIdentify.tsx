@@ -13,6 +13,11 @@ export interface PhotoGridIdentifyProps {
   value: string | null;
   onChange: (value: string) => void;
   ariaLabel?: string;
+  /** When true, the species name labels under each photo are hidden so the
+   *  identification task is purely visual. The label still renders as a
+   *  fallback when the image is missing, otherwise the user couldn't tell
+   *  placeholder tiles apart. */
+  hideLabels?: boolean;
 }
 
 /**
@@ -26,6 +31,7 @@ export function PhotoGridIdentify({
   value,
   onChange,
   ariaLabel,
+  hideLabels = false,
 }: PhotoGridIdentifyProps) {
   const grid = choices.filter((c) => c.value !== notSureValue);
   const notSure = choices.find((c) => c.value === notSureValue);
@@ -39,6 +45,7 @@ export function PhotoGridIdentify({
               choice={choice}
               selected={value === choice.value}
               onSelect={() => onChange(choice.value)}
+              hideLabel={hideLabels}
             />
           </li>
         ))}
@@ -68,14 +75,17 @@ function PhotoTile({
   choice,
   selected,
   onSelect,
+  hideLabel,
 }: {
   choice: PhotoGridChoice;
   selected: boolean;
   onSelect: () => void;
+  hideLabel: boolean;
 }) {
   const [errored, setErrored] = useState(false);
   const base = import.meta.env.BASE_URL;
   const src = choice.thumbnail ? `${base}species/${choice.thumbnail}` : null;
+  const showName = !hideLabel || errored || !src;
 
   return (
     <button
@@ -115,13 +125,15 @@ function PhotoTile({
           </span>
         )}
       </div>
-      <div
-        className={`px-3 py-2 text-center text-sm font-semibold ${
-          selected ? "text-forest-800" : "text-stone-800"
-        }`}
-      >
-        {choice.label}
-      </div>
+      {showName && (
+        <div
+          className={`px-3 py-2 text-center text-sm font-semibold ${
+            selected ? "text-forest-800" : "text-stone-800"
+          }`}
+        >
+          {choice.label}
+        </div>
+      )}
     </button>
   );
 }
