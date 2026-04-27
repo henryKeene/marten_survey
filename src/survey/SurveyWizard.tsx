@@ -21,7 +21,6 @@ export function SurveyWizard() {
   const isIntro = wiz.currentStepId === "intro";
   const isInteractions = wiz.currentStepId === "interactions";
   const isRisk = wiz.currentStepId === "risk";
-  const isTolerance = wiz.currentStepId === "tolerance";
 
   const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "error">("idle");
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -88,16 +87,8 @@ export function SurveyWizard() {
               <SectionBanner
                 emoji="🎯"
                 callout="Switch it up"
-                body="Now we're sorting cards into risk levels. Drag them around — there's no wrong way."
+                body="Now we're sorting cards into risk levels. Drag a card to a level chip at the top — or tap a card to pick a level."
                 tint="amber"
-              />
-            )}
-            {isTolerance && (
-              <SectionBanner
-                emoji="😊"
-                callout="One more switch"
-                body="Statements about coexisting. Tap the face that best matches how you feel."
-                tint="forest"
               />
             )}
 

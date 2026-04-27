@@ -241,16 +241,12 @@ const riskBucketSort: BucketSortConfig = {
   ],
 };
 
-const toleranceEmoji: EmojiReactionConfig = {
+const tolerancePaired: PairedConfig = {
   prompt: "How much do you agree with these statements about each species?",
-  hint: "Tap the face that best matches your view, for each species.",
-  emojis: [
-    { value: 0, emoji: "😠", label: "Strongly disagree" },
-    { value: 25, emoji: "😟", label: "Disagree" },
-    { value: 50, emoji: "😐", label: "Neutral" },
-    { value: 75, emoji: "🙂", label: "Agree" },
-    { value: 100, emoji: "😊", label: "Strongly agree" },
-  ],
+  hint: "Tap a number for the pine marten, then for the fox.",
+  leftLabel: "Strongly disagree",
+  rightLabel: "Strongly agree",
+  anchors: AGREEMENT_ANCHORS,
   pairs: [
     {
       icon: "🌱",
@@ -258,6 +254,8 @@ const toleranceEmoji: EmojiReactionConfig = {
         "Provides ecological benefits that make their presence worthwhile (e.g., controlling pests like rodents, helping seed dispersal)",
       pmId: "pm_benefits",
       foxId: "fox_benefits",
+      pmLabel: "Pine marten benefits",
+      foxLabel: "Fox benefits",
     },
     {
       icon: "🤝",
@@ -265,6 +263,8 @@ const toleranceEmoji: EmojiReactionConfig = {
         "I am willing to tolerate some inconvenience to allow them in my local area (e.g., minor garden damage)",
       pmId: "pm_tolerate",
       foxId: "fox_tolerate",
+      pmLabel: "Tolerate pine marten",
+      foxLabel: "Tolerate fox",
     },
     {
       icon: "🛡️",
@@ -272,6 +272,8 @@ const toleranceEmoji: EmojiReactionConfig = {
         "I would take steps to make interactions less likely (e.g., securing bins, electric fencing for poultry)",
       pmId: "pm_prevent",
       foxId: "fox_prevent",
+      pmLabel: "Prevent pine marten interactions",
+      foxLabel: "Prevent fox interactions",
     },
     {
       icon: "🌿",
@@ -279,6 +281,8 @@ const toleranceEmoji: EmojiReactionConfig = {
         "Non-lethal methods should be used to manage them (e.g., deterrents, artificial den boxes)",
       pmId: "pm_nonlethal",
       foxId: "fox_nonlethal",
+      pmLabel: "Non-lethal management for pine marten",
+      foxLabel: "Non-lethal management for fox",
     },
     {
       icon: "⚖️",
@@ -286,6 +290,8 @@ const toleranceEmoji: EmojiReactionConfig = {
         "Lethal control should be permitted if they cause significant or persistent damage / losses",
       pmId: "pm_lethal",
       foxId: "fox_lethal",
+      pmLabel: "Lethal control of pine marten",
+      foxLabel: "Lethal control of fox",
     },
   ],
 };
@@ -364,9 +370,9 @@ export const wizardPages: WizardPage[] = [
     id: "tolerance",
     title: "Living alongside them",
     intro:
-      "Five short statements about coexisting with these species. Tap the face that best matches how you feel — for each species.",
+      "Five short statements about coexisting with each species. Tap a number for each one.",
     questions: toleranceQuestions,
-    emojiReaction: toleranceEmoji,
+    paired: tolerancePaired,
   },
   {
     id: "interactions",
