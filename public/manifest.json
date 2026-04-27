@@ -1,0 +1,9 @@
+{
+  "name": "Living with Predators Questionnaire",
+  "short_name": "Predators Survey",
+  "description": "A short research survey about foxes and pine martens on the island of Ireland.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#064e3b"
+}

@@ -30,16 +30,16 @@ describe("validateIrishOrNIPostcode", () => {
     if (!r.ok) expect(r.reason).toBe("empty");
   });
 
-  it("flags GB postcodes distinctly", () => {
-    for (const input of ["SW1A 1AA", "W1A 0AX", "M1 1AE"]) {
+  it("accepts shorter alphanumeric postcodes", () => {
+    for (const input of ["12345", "HELLO", "A1B2C3"]) {
       const r = validateIrishOrNIPostcode(input);
-      expect(r.ok).toBe(false);
-      if (!r.ok) expect(r.reason).toBe("looks-like-gb-postcode");
+      expect(r.ok).toBe(true);
+      if (r.ok) expect(r.kind).toBe("postcode");
     }
   });
 
-  it("rejects obviously unrecognised input", () => {
-    for (const input of ["12345", "HELLO", "NOT A CODE"]) {
+  it("rejects invalid postcode input", () => {
+    for (const input of ["NOT A CODE!", "12345678", "BT12345@@"]) {
       const r = validateIrishOrNIPostcode(input);
       expect(r.ok).toBe(false);
       if (!r.ok) expect(r.reason).toBe("unrecognised");

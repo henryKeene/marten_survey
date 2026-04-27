@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { AnswerValue } from "./schema-types";
 import type { StepId } from "./pages";
 import { stepIds } from "./wizard-state";
@@ -11,24 +11,7 @@ import {
   stepIndex,
 } from "./wizard-state";
 import type { WizardState } from "./wizard-state";
-import { clearState, loadState, saveState } from "./persistence";
-
-function readHashStep(): StepId | null {
-  if (typeof window === "undefined") return null;
-  const hash = window.location.hash.replace(/^#\/?/, "");
-  return stepIds.includes(hash as StepId) ? (hash as StepId) : null;
-}
-
-function writeHashStep(id: StepId) {
-  if (typeof window === "undefined") return;
-  const newHash = `#/${id}`;
-  if (window.location.hash !== newHash) {
-    // Use replaceState to avoid stacking history entries that the user
-    // would need to back through; natural browser back still works because
-    // we push a new entry on advance() below.
-    window.history.replaceState(null, "", newHash);
-  }
-}
+import { clearState } from "./persistence";
 
 export interface UseWizard {
   state: WizardState;
@@ -44,42 +27,7 @@ export interface UseWizard {
 }
 
 export function useWizard(): UseWizard {
-  const [state, setState] = useState<WizardState>(() => {
-    const restored = loadState();
-    if (restored) {
-      const hashStep = readHashStep();
-      return hashStep ? { ...restored, currentStepId: hashStep } : restored;
-    }
-    const fresh = initialState();
-    const hashStep = readHashStep();
-    return hashStep ? { ...fresh, currentStepId: hashStep } : fresh;
-  });
-
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => saveState(state), 150);
-    return () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-    };
-  }, [state]);
-
-  useEffect(() => {
-    writeHashStep(state.currentStepId);
-  }, [state.currentStepId]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const handler = () => {
-      const target = readHashStep();
-      if (target && target !== state.currentStepId) {
-        setState((s) => ({ ...s, currentStepId: target }));
-      }
-    };
-    window.addEventListener("hashchange", handler);
-    return () => window.removeEventListener("hashchange", handler);
-  }, [state.currentStepId]);
+  const [state, setState] = useState<WizardState>(() => initialState());
 
   const setAnswer = useCallback((id: string, value: AnswerValue) => {
     setState((s) => {
@@ -98,6 +46,13 @@ export function useWizard(): UseWizard {
 
   const goBack = useCallback(() => {
     setState((s) => ({ ...s, currentStepId: prevStepId(s.currentStepId) }));
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash) {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
   }, []);
 
   // Scroll to top whenever the step changes (Next, Back, or jump). Runs after

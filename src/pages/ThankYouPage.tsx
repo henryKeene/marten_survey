@@ -1,10 +1,12 @@
+import { Button } from "../components/ui/Button";
 import { FactCard } from "../components/ui/FactCard";
 
 interface ThankYouPageProps {
   submissionId: string;
+  onRestart: () => void;
 }
 
-export function ThankYouPage({ submissionId }: ThankYouPageProps) {
+export function ThankYouPage({ submissionId, onRestart }: ThankYouPageProps) {
   return (
     <article className="space-y-6 text-center">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-forest-100 text-4xl">
@@ -25,6 +27,12 @@ export function ThankYouPage({ submissionId }: ThankYouPageProps) {
 
       <div className="mx-auto max-w-prose text-left">
         <FactCard variant="celebratory" seed={submissionId} />
+      </div>
+
+      <div className="flex justify-center">
+        <Button size="lg" onClick={onRestart}>
+          Take it again
+        </Button>
       </div>
     </article>
   );

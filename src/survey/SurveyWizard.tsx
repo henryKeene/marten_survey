@@ -2,37 +2,50 @@ import { useEffect, useState } from "react";
 import { useWizard } from "./use-wizard";
 import { PageRenderer } from "./PageRenderer";
 import { wizardPages } from "./pages";
+
 import { WelcomePage } from "../pages/WelcomePage";
 import { ThankYouPage } from "../pages/ThankYouPage";
+import { FocalSpeciesPage } from "../pages/FocalSpeciesPage";
+
 import { Button } from "../components/ui/Button";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { SpeciesRevealPanel } from "../components/ui/SpeciesRevealPanel";
 import { FactCard } from "../components/ui/FactCard";
 import { SectionBanner } from "../components/ui/SectionBanner";
+
 import { submit, type SubmitResult } from "./submit";
 import { clearState } from "./persistence";
 
 export function SurveyWizard() {
   const wiz = useWizard();
+
   const page = wizardPages.find((p) => p.id === wiz.currentStepId)!;
+
   const isFirst = wiz.currentIndex === 0;
+  const isWelcome = wiz.currentStepId === "welcome";
+  const isSpecies = wiz.currentStepId === "species";
   const isThanks = wiz.currentStepId === "thanks";
   const isDemographics = wiz.currentStepId === "demographics";
   const isIntro = wiz.currentStepId === "intro";
   const isInteractions = wiz.currentStepId === "interactions";
   const isRisk = wiz.currentStepId === "risk";
 
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "error">("idle");
+  const [submitStatus, setSubmitStatus] = useState<
+    "idle" | "submitting" | "error"
+  >("idle");
+
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     setSubmitStatus("submitting");
     setSubmitError(null);
+
     const result: SubmitResult = await submit(
       wiz.state.submissionId,
       wiz.state.startedAt,
       wiz.state.answers,
     );
+
     if (result.ok) {
       clearState();
       setSubmitStatus("idle");
@@ -60,7 +73,7 @@ export function SurveyWizard() {
       )}
 
       <section className="survey-card p-4 md:p-10">
-        {wiz.currentStepId === "welcome" ? (
+        {isWelcome ? (
           <WelcomePage
             consented={wiz.state.answers.__consent === true}
             onConsentChange={(v) => wiz.setAnswer("__consent", v as never)}
@@ -72,16 +85,18 @@ export function SurveyWizard() {
             onRegionChange={(v) => wiz.setAnswer("__region", v as never)}
             onStart={wiz.advance}
           />
+        ) : isSpecies ? (
+          <FocalSpeciesPage onNext={wiz.advance} />
         ) : isThanks ? (
-          <ThankYouPage submissionId={wiz.state.submissionId} />
+          <ThankYouPage
+            submissionId={wiz.state.submissionId}
+            onRestart={wiz.reset}
+          />
         ) : (
           <div className="space-y-8">
-            <header className="space-y-2">
-              <h1 className="!font-serif !text-2xl md:!text-3xl">{page.title}</h1>
-              {page.intro && (
-                <p className="max-w-prose text-stone-700">{page.intro}</p>
-              )}
-            </header>
+            {page.intro && (
+              <p className="max-w-prose text-stone-700">{page.intro}</p>
+            )}
 
             {isRisk && (
               <SectionBanner
@@ -106,9 +121,15 @@ export function SurveyWizard() {
             )}
 
             <nav className="flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 pt-6">
-              <Button variant="secondary" size="lg" onClick={wiz.goBack} disabled={isFirst}>
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={wiz.goBack}
+                disabled={isFirst}
+              >
                 Back
               </Button>
+
               {isDemographics ? (
                 <div className="flex flex-col items-end gap-2">
                   <Button
@@ -116,19 +137,30 @@ export function SurveyWizard() {
                     onClick={handleSubmit}
                     disabled={!wiz.canProceed || submitStatus === "submitting"}
                   >
-                    {submitStatus === "submitting" ? "Submitting…" : "Submit survey"}
+                    {submitStatus === "submitting"
+                      ? "Submitting…"
+                      : "Submit survey"}
                   </Button>
+
                   {submitStatus === "error" && (
                     <p className="text-sm text-red-700">
                       Couldn't submit: {submitError}.{" "}
-                      <button type="button" className="underline" onClick={handleSubmit}>
+                      <button
+                        type="button"
+                        className="underline"
+                        onClick={handleSubmit}
+                      >
                         Try again
                       </button>
                     </p>
                   )}
                 </div>
               ) : (
-                <Button size="lg" onClick={wiz.advance} disabled={!wiz.canProceed}>
+                <Button
+                  size="lg"
+                  onClick={wiz.advance}
+                  disabled={!wiz.canProceed}
+                >
                   Next
                 </Button>
               )}
@@ -139,10 +171,10 @@ export function SurveyWizard() {
 
       {!isThanks && (
         <footer className="text-center text-xs text-stone-500">
-          Ulster University · School of Geography and Environmental Sciences · Research survey
+          Ulster University | School of Geography and Environmental Sciences |
+          Leighanna Teal Dawson
         </footer>
       )}
     </main>
   );
 }
-
