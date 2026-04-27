@@ -5,6 +5,8 @@ import { FieldLabel, HelperText } from "../components/ui/FieldLabel";
 import { LabelText } from "../components/ui/LabelText";
 import { RadioGroup } from "../components/ui/RadioGroup";
 import { CheckboxGroup } from "../components/ui/CheckboxGroup";
+import { ChipCloud } from "../components/ui/ChipCloud";
+import { SearchableRadioGroup } from "../components/ui/SearchableRadioGroup";
 import { TextInput } from "../components/ui/TextInput";
 import { TextArea } from "../components/ui/TextArea";
 import { RiskSlider } from "../components/ui/RiskSlider";
@@ -91,40 +93,69 @@ export function QuestionRenderer({ question: q, answers, onAnswer }: Props) {
           />
         );
       }
+      // Long single-select lists (e.g. industry) get a search-as-you-type
+      // affordance so the user isn't hunting through 15 horizontal radios.
+      const useSearchable = q.id === "job" || q.choices.length >= 12;
       return (
         <section aria-labelledby={labelId} className="space-y-3">
           <FieldLabel id={labelId} required={q.required}>
             <LabelText text={q.prompt} />
           </FieldLabel>
           {q.hint && <HelperText>{q.hint}</HelperText>}
-          <RadioGroup
-            name={q.id}
-            choices={q.choices}
-            value={typeof value === "string" ? value : null}
-            onChange={(v) => onAnswer(q.id, v)}
-            layout={q.layout}
-            ariaLabelledby={labelId}
-          />
+          {useSearchable ? (
+            <SearchableRadioGroup
+              name={q.id}
+              choices={q.choices}
+              value={typeof value === "string" ? value : null}
+              onChange={(v) => onAnswer(q.id, v)}
+              ariaLabelledby={labelId}
+            />
+          ) : (
+            <RadioGroup
+              name={q.id}
+              choices={q.choices}
+              value={typeof value === "string" ? value : null}
+              onChange={(v) => onAnswer(q.id, v)}
+              layout={q.layout}
+              ariaLabelledby={labelId}
+            />
+          )}
         </section>
       );
     }
 
-    case "multi":
+    case "multi": {
+      // Hobbies-style multi-selects with shorter labels work better as a
+      // wrapping chip cloud than as stacked checkboxes — faster to scan and
+      // tap on a phone. Long-label multi-selects (e.g. seasons) keep the
+      // existing CheckboxGroup so the labels don't truncate.
+      const useChips = q.id === "hobbies";
       return (
         <section aria-labelledby={labelId} className="space-y-3">
           <FieldLabel id={labelId} required={q.required}>
             <LabelText text={q.prompt} />
           </FieldLabel>
           {q.hint && <HelperText>{q.hint}</HelperText>}
-          <CheckboxGroup
-            name={q.id}
-            choices={q.choices}
-            value={Array.isArray(value) ? (value as string[]) : []}
-            onChange={(v) => onAnswer(q.id, v)}
-            ariaLabelledby={labelId}
-          />
+          {useChips ? (
+            <ChipCloud
+              name={q.id}
+              choices={q.choices}
+              value={Array.isArray(value) ? (value as string[]) : []}
+              onChange={(v) => onAnswer(q.id, v)}
+              ariaLabelledby={labelId}
+            />
+          ) : (
+            <CheckboxGroup
+              name={q.id}
+              choices={q.choices}
+              value={Array.isArray(value) ? (value as string[]) : []}
+              onChange={(v) => onAnswer(q.id, v)}
+              ariaLabelledby={labelId}
+            />
+          )}
         </section>
       );
+    }
 
     case "slider": {
       // showPercent is true by default; the only sliders that opt out are the
