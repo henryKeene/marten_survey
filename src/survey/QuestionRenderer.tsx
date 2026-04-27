@@ -8,7 +8,8 @@ import { CheckboxGroup } from "../components/ui/CheckboxGroup";
 import { TextInput } from "../components/ui/TextInput";
 import { TextArea } from "../components/ui/TextArea";
 import { RiskSlider } from "../components/ui/RiskSlider";
-import { RiskSliderGroup } from "../components/ui/RiskSliderGroup";
+import { SegmentedLikert } from "../components/ui/SegmentedLikert";
+import { SegmentedLikertGroup } from "../components/ui/SegmentedLikertGroup";
 import { ChoiceMatrix } from "../components/ui/ChoiceMatrix";
 import { validateIrishOrNIPostcode, postcodeErrorMessage } from "./validators/postcode";
 
@@ -70,26 +71,42 @@ export function QuestionRenderer({ question: q, answers, onAnswer }: Props) {
         </section>
       );
 
-    case "slider":
+    case "slider": {
+      // showPercent is true by default; the only sliders that opt out are the
+      // anchor-based ones (sentiment sliders). Those become pill-tap Likerts;
+      // the percent sliders (confidence_f / confidence_pm) keep the 0-100 thumb.
+      const isAnchorScale = q.showPercent === false && q.anchors.length >= 2;
       return (
         <section aria-labelledby={labelId} className="space-y-3">
           <FieldLabel id={labelId} required={q.required}>
             <LabelText text={q.prompt} />
           </FieldLabel>
           {q.hint && <HelperText>{q.hint}</HelperText>}
-          <RiskSlider
-            value={typeof value === "number" ? value : null}
-            onChange={(v) => onAnswer(q.id, v)}
-            leftLabel={q.leftLabel}
-            rightLabel={q.rightLabel}
-            anchors={q.anchors}
-            ariaLabel={`${q.prompt} — scale from ${q.leftLabel} to ${q.rightLabel}`}
-            showHeaderLabels
-            showPercent={q.showPercent}
-            defaultValue={q.defaultValue}
-          />
+          {isAnchorScale ? (
+            <SegmentedLikert
+              value={typeof value === "number" ? value : null}
+              onChange={(v) => onAnswer(q.id, v)}
+              leftLabel={q.leftLabel}
+              rightLabel={q.rightLabel}
+              anchors={q.anchors}
+              ariaLabel={`${q.prompt} — scale from ${q.leftLabel} to ${q.rightLabel}`}
+            />
+          ) : (
+            <RiskSlider
+              value={typeof value === "number" ? value : null}
+              onChange={(v) => onAnswer(q.id, v)}
+              leftLabel={q.leftLabel}
+              rightLabel={q.rightLabel}
+              anchors={q.anchors}
+              ariaLabel={`${q.prompt} — scale from ${q.leftLabel} to ${q.rightLabel}`}
+              showHeaderLabels
+              showPercent={q.showPercent}
+              defaultValue={q.defaultValue}
+            />
+          )}
         </section>
       );
+    }
 
     case "slider-group": {
       // Slider-group item answers live as top-level keys in the answers map
@@ -104,7 +121,7 @@ export function QuestionRenderer({ question: q, answers, onAnswer }: Props) {
           <span id={labelId} className="sr-only">
             {q.prompt}
           </span>
-          <RiskSliderGroup
+          <SegmentedLikertGroup
             prompt={q.prompt}
             leftLabel={q.leftLabel}
             rightLabel={q.rightLabel}
@@ -112,8 +129,6 @@ export function QuestionRenderer({ question: q, answers, onAnswer }: Props) {
             items={q.items}
             values={values}
             onChange={(itemId, v) => onAnswer(itemId, v)}
-            showPercent={false}
-            defaultValue={50}
             required={q.required}
           />
         </section>
