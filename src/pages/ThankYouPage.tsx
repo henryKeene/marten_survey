@@ -1,3 +1,5 @@
+import { FactCard } from "../components/ui/FactCard";
+
 interface ThankYouPageProps {
   submissionId: string;
 }
@@ -20,6 +22,10 @@ export function ThankYouPage({ submissionId }: ThankYouPageProps) {
         If you know other people who might be willing to take part, please share this page with
         them. Their views matter too.
       </p>
+
+      <div className="mx-auto max-w-prose text-left">
+        <FactCard variant="celebratory" seed={submissionId} />
+      </div>
     </article>
   );
 }
