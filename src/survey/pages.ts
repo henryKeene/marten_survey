@@ -47,6 +47,9 @@ export interface BucketSortItemConfig {
   icon?: string;
   contextLabel: string;
   species: "pm" | "fox";
+  /** Full plain-English question used as the card's primary text so the
+   *  user understands what they're rating, not just a 'PM · Pets' tag. */
+  question: string;
 }
 
 export interface BucketSortBucketConfig {
@@ -228,16 +231,84 @@ const riskBucketSort: BucketSortConfig = {
     },
   ],
   items: [
-    { id: "pm_pet", icon: "🐾", contextLabel: "Pets", species: "pm" },
-    { id: "fox_pet", icon: "🐾", contextLabel: "Pets", species: "fox" },
-    { id: "pm_poultry", icon: "🐔", contextLabel: "Poultry / gamebirds", species: "pm" },
-    { id: "fox_poultry", icon: "🐔", contextLabel: "Poultry / gamebirds", species: "fox" },
-    { id: "pm_livestock", icon: "🐑", contextLabel: "Livestock", species: "pm" },
-    { id: "fox_livestock", icon: "🐑", contextLabel: "Livestock", species: "fox" },
-    { id: "pm_protected", icon: "🐿️", contextLabel: "Protected species", species: "pm" },
-    { id: "fox_protected", icon: "🐿️", contextLabel: "Protected species", species: "fox" },
-    { id: "pm_humans", icon: "🚶", contextLabel: "People", species: "pm" },
-    { id: "fox_humans", icon: "🚶", contextLabel: "People", species: "fox" },
+    {
+      id: "pm_pet",
+      icon: "🐾",
+      contextLabel: "Pets",
+      species: "pm",
+      question:
+        "How risky are pine martens to pets — dogs, cats, rabbits — nearby?",
+    },
+    {
+      id: "fox_pet",
+      icon: "🐾",
+      contextLabel: "Pets",
+      species: "fox",
+      question:
+        "How risky are foxes to pets — dogs, cats, rabbits — nearby?",
+    },
+    {
+      id: "pm_poultry",
+      icon: "🐔",
+      contextLabel: "Poultry / gamebirds",
+      species: "pm",
+      question:
+        "How risky are pine martens to poultry and gamebirds (chickens, pheasants)?",
+    },
+    {
+      id: "fox_poultry",
+      icon: "🐔",
+      contextLabel: "Poultry / gamebirds",
+      species: "fox",
+      question:
+        "How risky are foxes to poultry and gamebirds (chickens, pheasants)?",
+    },
+    {
+      id: "pm_livestock",
+      icon: "🐑",
+      contextLabel: "Livestock",
+      species: "pm",
+      question:
+        "How risky are pine martens to other livestock — sheep, goats, pigs?",
+    },
+    {
+      id: "fox_livestock",
+      icon: "🐑",
+      contextLabel: "Livestock",
+      species: "fox",
+      question:
+        "How risky are foxes to other livestock — sheep, goats, pigs?",
+    },
+    {
+      id: "pm_protected",
+      icon: "🐿️",
+      contextLabel: "Protected species",
+      species: "pm",
+      question:
+        "How risky are pine martens to protected species like red squirrels or ground-nesting birds?",
+    },
+    {
+      id: "fox_protected",
+      icon: "🐿️",
+      contextLabel: "Protected species",
+      species: "fox",
+      question:
+        "How risky are foxes to protected species like red squirrels or ground-nesting birds?",
+    },
+    {
+      id: "pm_humans",
+      icon: "🚶",
+      contextLabel: "People",
+      species: "pm",
+      question: "How risky are pine martens to people — risk of injury?",
+    },
+    {
+      id: "fox_humans",
+      icon: "🚶",
+      contextLabel: "People",
+      species: "fox",
+      question: "How risky are foxes to people — risk of injury?",
+    },
   ],
 };
 

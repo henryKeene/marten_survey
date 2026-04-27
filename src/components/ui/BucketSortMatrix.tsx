@@ -17,8 +17,8 @@ export interface BucketSortItem {
   id: string;
   icon?: string;
   contextLabel: string;
-  /** Visual species tag — small colored dot + name on the card. */
   species: "pm" | "fox";
+  question: string;
 }
 
 export interface BucketSortMatrixProps {
@@ -36,13 +36,14 @@ const SPECIES_LABELS: Record<"pm" | "fox", { dot: string; name: string }> = {
 };
 
 /**
- * Risk-level sorting input. Replaces the old vertically-stacked bucket lanes
- * (which pushed buckets off-screen during a drag on mobile) with a sticky
- * horizontal chip row at the top of the page — the buckets are always one
- * thumb-flick away no matter how far the user has scrolled the card list.
+ * Risk-level sorting input. Cards carry the full plain-English question they
+ * represent ("How risky are pine martens to pets nearby?") so the user knows
+ * what they're rating, not just a 'PM · Pets' label.
  *
- * Each card shows its current level inline. Drag a card up to a chip to
- * commit, or tap a card to open an inline level picker.
+ * Workflow: drag or tap a card → it commits to a bucket and *leaves* the
+ * to-sort list. Tapping a chip in the sticky bucket row expands the chip
+ * inline so the user can see and re-sort what's inside. The list shrinks as
+ * the user works, which also fixes the mobile cut-off-at-the-bottom issue.
  */
 export function BucketSortMatrix({
   prompt,
@@ -56,6 +57,7 @@ export function BucketSortMatrix({
   const [ghost, setGhost] = useState<{ x: number; y: number } | null>(null);
   const [hoverBucket, setHoverBucket] = useState<number | null>(null);
   const [tapPickerId, setTapPickerId] = useState<string | null>(null);
+  const [expandedBucket, setExpandedBucket] = useState<number | null>(null);
   const chipRefs = useRef<Map<number, HTMLElement>>(new Map());
 
   const findBucketAt = useCallback((x: number, y: number): number | null => {
@@ -98,17 +100,24 @@ export function BucketSortMatrix({
   };
 
   const counts = new Map<number, number>(buckets.map((b) => [b.value, 0]));
-  let unsortedCount = 0;
+  const inBucket = new Map<number, BucketSortItem[]>(
+    buckets.map((b) => [b.value, []]),
+  );
+  const unsorted: BucketSortItem[] = [];
   for (const item of items) {
     const v = values[item.id];
     if (typeof v === "number" && counts.has(v)) {
       counts.set(v, (counts.get(v) ?? 0) + 1);
+      inBucket.get(v)!.push(item);
     } else {
-      unsortedCount++;
+      unsorted.push(item);
     }
   }
   const total = items.length;
-  const placed = total - unsortedCount;
+  const placed = total - unsorted.length;
+
+  const expandedItems =
+    expandedBucket !== null ? (inBucket.get(expandedBucket) ?? []) : [];
 
   return (
     <section className="space-y-4">
@@ -117,9 +126,6 @@ export function BucketSortMatrix({
           <LabelText text={prompt} />
         </h3>
         {hint && <p className="mt-1 text-sm text-stone-600">{hint}</p>}
-        <p className="mt-2 text-xs font-medium text-forest-700">
-          {placed} of {total} sorted
-        </p>
       </div>
 
       <div className="sticky top-0 z-10 -mx-4 border-b border-stone-200 bg-stone-50 px-4 py-3 md:-mx-10 md:px-10">
@@ -127,19 +133,34 @@ export function BucketSortMatrix({
           {buckets.map((bucket) => {
             const count = counts.get(bucket.value) ?? 0;
             const isHover = hoverBucket === bucket.value;
+            const isExpanded = expandedBucket === bucket.value;
             return (
-              <div
+              <button
                 key={bucket.value}
                 ref={(el) => {
                   if (el) chipRefs.current.set(bucket.value, el);
                   else chipRefs.current.delete(bucket.value);
                 }}
+                type="button"
+                onClick={() =>
+                  setExpandedBucket((cur) =>
+                    cur === bucket.value ? null : bucket.value,
+                  )
+                }
+                aria-label={`${bucket.label} — ${count} placed${
+                  isExpanded ? ", expanded" : ", tap to expand"
+                }`}
+                aria-expanded={isExpanded}
+                disabled={count === 0 && !isHover}
                 className={[
                   "flex min-h-[3.25rem] flex-col items-center justify-center rounded-xl border-2 px-1 py-1 text-center transition-all",
                   bucket.color,
                   isHover
                     ? "scale-105 border-stone-900 ring-4 ring-forest-300"
-                    : "border-transparent",
+                    : isExpanded
+                      ? "border-stone-900 ring-2 ring-stone-900"
+                      : "border-transparent",
+                  count === 0 && !isHover ? "opacity-60" : "",
                 ].join(" ")}
               >
                 <span
@@ -150,25 +171,87 @@ export function BucketSortMatrix({
                 <span className={`text-xs font-bold ${bucket.textColor}`}>
                   {count}
                 </span>
-              </div>
+              </button>
             );
           })}
         </div>
       </div>
 
-      <ul className="space-y-2">
-        {items.map((item) => {
-          const v = values[item.id];
-          const bucket =
-            typeof v === "number"
-              ? (buckets.find((b) => b.value === v) ?? null)
-              : null;
-          const isPickerOpen = tapPickerId === item.id;
-          return (
+      {expandedBucket !== null && (
+        <div
+          className={`rounded-xl border-2 p-3 ${
+            buckets.find((b) => b.value === expandedBucket)?.color ?? ""
+          }`}
+        >
+          <div className="mb-2 flex items-center justify-between">
+            <span
+              className={`text-xs font-bold uppercase tracking-wide ${
+                buckets.find((b) => b.value === expandedBucket)?.textColor ?? ""
+              }`}
+            >
+              {buckets.find((b) => b.value === expandedBucket)?.label} ·{" "}
+              {expandedItems.length}
+            </span>
+            <button
+              type="button"
+              onClick={() => setExpandedBucket(null)}
+              className="text-xs font-medium text-stone-700 underline underline-offset-2"
+            >
+              Close
+            </button>
+          </div>
+          {expandedItems.length === 0 ? (
+            <p className="text-xs italic text-stone-600">
+              Nothing here yet — drag or tap a card below into this level.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {expandedItems.map((item) => (
+                <li key={item.id}>
+                  <SortableCard
+                    item={item}
+                    bucket={buckets.find((b) => b.value === expandedBucket) ?? null}
+                    isDragging={dragId === item.id}
+                    compact
+                    onPointerDown={(e) => startDrag(item.id, e)}
+                    onPointerMove={moveDrag}
+                    onPointerUp={endDrag}
+                    onPointerCancel={cancelDrag}
+                    onTap={() =>
+                      setTapPickerId((cur) =>
+                        cur === item.id ? null : item.id,
+                      )
+                    }
+                  />
+                  {tapPickerId === item.id && (
+                    <TapPicker
+                      buckets={buckets}
+                      selected={values[item.id] as number | null}
+                      onPick={(val) => {
+                        onChange(item.id, val);
+                        setTapPickerId(null);
+                      }}
+                    />
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      <div>
+        <p className="mb-2 text-xs font-medium text-forest-700">
+          {unsorted.length === 0
+            ? `✓ All ${total} sorted — tap any chip above to review or change.`
+            : `${placed} of ${total} sorted · ${unsorted.length} to go`}
+        </p>
+        <ul className="space-y-2">
+          {unsorted.map((item) => (
             <li key={item.id}>
               <SortableCard
                 item={item}
-                bucket={bucket}
+                bucket={null}
                 isDragging={dragId === item.id}
                 onPointerDown={(e) => startDrag(item.id, e)}
                 onPointerMove={moveDrag}
@@ -178,10 +261,10 @@ export function BucketSortMatrix({
                   setTapPickerId((cur) => (cur === item.id ? null : item.id))
                 }
               />
-              {isPickerOpen && (
+              {tapPickerId === item.id && (
                 <TapPicker
                   buckets={buckets}
-                  selected={typeof v === "number" ? v : null}
+                  selected={null}
                   onPick={(val) => {
                     onChange(item.id, val);
                     setTapPickerId(null);
@@ -189,9 +272,9 @@ export function BucketSortMatrix({
                 />
               )}
             </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+      </div>
 
       {ghost && dragId && (
         <div
@@ -201,7 +284,7 @@ export function BucketSortMatrix({
         >
           {(() => {
             const item = items.find((i) => i.id === dragId);
-            return item ? <CardCore item={item} /> : null;
+            return item ? <CardHeaderRow item={item} /> : null;
           })()}
         </div>
       )}
@@ -213,6 +296,7 @@ function SortableCard({
   item,
   bucket,
   isDragging,
+  compact,
   onPointerDown,
   onPointerMove,
   onPointerUp,
@@ -222,6 +306,7 @@ function SortableCard({
   item: BucketSortItem;
   bucket: BucketSortBucket | null;
   isDragging: boolean;
+  compact?: boolean;
   onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => void;
   onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => void;
   onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => void;
@@ -232,11 +317,13 @@ function SortableCard({
     null,
   );
 
+  const sp = SPECIES_LABELS[item.species];
+
   return (
     <div
       role="button"
       tabIndex={0}
-      aria-label={`${SPECIES_LABELS[item.species].name} — ${item.contextLabel}${
+      aria-label={`${sp.name} — ${item.question}${
         bucket ? ` — ${bucket.label}` : ""
       }`}
       onPointerDown={(e) => {
@@ -262,39 +349,46 @@ function SortableCard({
         onPointerCancel(e);
       }}
       className={[
-        "flex w-full cursor-grab touch-none select-none items-center gap-3 rounded-xl border-2 bg-white px-3 py-3 shadow-sm transition active:cursor-grabbing",
+        "flex w-full cursor-grab touch-none select-none items-stretch gap-3 rounded-xl border-2 bg-white px-3 py-3 shadow-sm transition active:cursor-grabbing",
         isDragging
           ? "border-forest-700 opacity-30"
           : "border-stone-200 hover:border-forest-400",
       ].join(" ")}
     >
-      <span aria-hidden="true" className="text-stone-400">
+      <span aria-hidden="true" className="self-center text-stone-400">
         ⋮⋮
       </span>
       <div className="min-w-0 flex-1">
-        <CardCore item={item} />
+        <CardHeaderRow item={item} />
+        {!compact && (
+          <p className="mt-1.5 text-sm leading-snug text-stone-800">
+            {item.question}
+          </p>
+        )}
       </div>
-      {bucket ? (
-        <span
-          className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${bucket.color} ${bucket.textColor}`}
-        >
-          {bucket.shortLabel}
-        </span>
-      ) : (
-        <span className="shrink-0 rounded-full border border-dashed border-stone-300 px-3 py-1 text-xs font-medium text-stone-500">
-          Tap or drag
-        </span>
-      )}
+      <div className="flex shrink-0 items-center">
+        {bucket ? (
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${bucket.color} ${bucket.textColor}`}
+          >
+            {bucket.shortLabel}
+          </span>
+        ) : (
+          <span className="rounded-full border border-dashed border-stone-300 px-3 py-1 text-xs font-medium text-stone-500">
+            Tap or drag
+          </span>
+        )}
+      </div>
     </div>
   );
 }
 
-function CardCore({ item }: { item: BucketSortItem }) {
+function CardHeaderRow({ item }: { item: BucketSortItem }) {
   const sp = SPECIES_LABELS[item.species];
   return (
-    <span className="inline-flex items-center gap-2 text-sm">
+    <div className="flex items-center gap-2 text-xs">
       {item.icon && (
-        <span aria-hidden="true" className="text-base">
+        <span aria-hidden="true" className="text-base leading-none">
           {item.icon}
         </span>
       )}
@@ -302,12 +396,12 @@ function CardCore({ item }: { item: BucketSortItem }) {
         aria-hidden="true"
         className={`inline-block h-2 w-2 shrink-0 rounded-full ${sp.dot}`}
       />
-      <span className="text-stone-800">
-        <span className="font-bold">{sp.name}</span>
-        <span className="text-stone-500"> · </span>
-        <span>{item.contextLabel}</span>
+      <span className="font-bold uppercase tracking-wide text-stone-700">
+        {sp.name}
       </span>
-    </span>
+      <span className="text-stone-500">·</span>
+      <span className="text-stone-600">{item.contextLabel}</span>
+    </div>
   );
 }
 
@@ -334,7 +428,9 @@ function TapPicker({
             className={[
               "flex flex-col items-center justify-center rounded-lg border-2 px-1 py-2 text-center transition",
               b.color,
-              isSelected ? "border-stone-900 ring-2 ring-forest-300" : "border-transparent hover:border-stone-700",
+              isSelected
+                ? "border-stone-900 ring-2 ring-forest-300"
+                : "border-transparent hover:border-stone-700",
             ].join(" ")}
           >
             <span

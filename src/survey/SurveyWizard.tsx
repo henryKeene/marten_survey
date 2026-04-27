@@ -87,7 +87,7 @@ export function SurveyWizard() {
               <SectionBanner
                 emoji="🎯"
                 callout="Switch it up"
-                body="Now we're sorting cards into risk levels. Drag a card to a level chip at the top — or tap a card to pick a level."
+                body="Sort each question into a risk level. Drag a card to a chip, or tap a card to pick. Tap any chip to review what's inside."
                 tint="amber"
               />
             )}
